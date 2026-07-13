@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CURRENT — AI CRM Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1116;
+    --panel:#161B24;
+    --panel-2:#1C2431;
+    --line:#262E3A;
+    --text:#E8EBF0;
+    --muted:#8B94A3;
+    --teal:#2DD4BF;
+    --teal-dim:rgba(45,212,191,0.14);
+    --amber:#F5A623;
+    --amber-dim:rgba(245,166,35,0.14);
+    --coral:#FF6B6B;
+    --coral-dim:rgba(255,107,107,0.14);
+    --violet:#8B7CF6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--teal); color:#0E1116;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+  a{color:inherit; text-decoration:none;}
+
+  /* ===== Layout shell ===== */
+  .shell{
+    display:grid;
+    grid-template-columns:64px 1fr 320px;
+    grid-template-rows:60px 1fr;
+    grid-template-areas:
+      "rail topbar topbar"
+      "rail main copilot";
+    height:100vh;
+    min-height:700px;
+  }
+
+  /* ===== Icon rail ===== */
+  .rail{
+    grid-area:rail;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 0;
+    gap:6px;
+  }
+  .rail-logo{
+    width:34px; height:34px;
+    border-radius:9px;
+    background:linear-gradient(135deg,var(--teal),var(--violet));
+    margin-bottom:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:#0E1116;
+    flex-shrink:0;
+  }
+  .rail-item{
+    width:40px; height:40px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:10px;
+    color:var(--muted);
+    cursor:pointer;
+    position:relative;
+    transition:background .15s ease, color .15s ease;
+    flex-shrink:0;
+  }
+  .rail-item:hover{background:var(--panel-2); color:var(--text);}
+  .rail-item.active{background:var(--teal-dim); color:var(--teal);}
+  .rail-item.active::before{
+    content:"";
+    position:absolute; left:-18px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:2px;
+    background:var(--teal);
+  }
+  .rail-item svg{width:19px; height:19px;}
+  .rail-spacer{flex:1;}
+  .rail-avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg,#4a5568,#2d3748);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600;
+    border:1px solid var(--line);
+  }
+
+  /* ===== Top bar ===== */
+  .topbar{
+    grid-area:topbar;
+    background:var(--ink);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    padding:0 22px;
+    gap:18px;
+  }
+  .brand{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .brand .tag{
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:11px;
+    color:var(--muted);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    padding:2px 8px;
+    border-radius:20px;
+  }
+  .workspace-switch{
+    display:flex; align-items:center; gap:6px;
+    color:var(--muted); font-size:12.5px;
+    padding:6px 10px; border-radius:8px;
+    border:1px solid var(--line);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .workspace-switch:hover{background:var(--panel);}
+  .search-bar{
+    flex:1;
+    max-width:460px;
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 12px;
+    color:var(--muted);
+  }
+  .search-bar svg{width:15px; height:15px; flex-shrink:0;}
+  .search-bar input{
+    background:none; border:none; outline:none; color:var(--text);
+    font-size:13px; width:100%;
+  }
+  .kbd{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:1px 5px;
+  }
+  .top-spacer{flex:1;}
+  .icon-btn{
+    width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:9px;
+    color:var(--muted);
+    cursor:pointer;
+    position:relative;
+  }
+  .icon-btn:hover{background:var(--panel);}
+  .icon-btn svg{width:17px; height:17px;}
+  .dot-badge{
+    position:absolute; top:6px; right:6px;
+    width:7px; height:7px; border-radius:50%;
+    background:var(--coral);
+    border:1.5px solid var(--ink);
+  }
+
+  /* ===== Main ===== */
+  .main{
+    grid-area:main;
+    overflow-y:auto;
+    padding:26px 28px 40px;
+  }
+  .page-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .page-head h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:23px;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .page-head p{color:var(--muted); font-size:13px;}
+  .head-actions{display:flex; gap:10px;}
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:600;
+    padding:9px 16px;
+    border-radius:9px;
+    cursor:pointer;
+    border:1px solid var(--line);
+    color:var(--text);
+    background:var(--panel);
+    display:flex; align-items:center; gap:6px;
+    transition:transform .1s ease, border-color .15s ease;
+  }
+  .btn:hover{border-color:#3a4557;}
+  .btn:active{transform:scale(0.97);}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--teal),#22b8a5);
+    color:#08211d;
+    border:none;
+  }
+  .btn svg{width:14px; height:14px;}
+
+  /* ===== KPI strip ===== */
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+    margin-bottom:26px;
+  }
+  .kpi-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px 14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi-card .label{
+    font-size:11.5px; color:var(--muted); font-weight:600;
+    text-transform:uppercase; letter-spacing:.04em;
+    margin-bottom:10px;
+  }
+  .kpi-card .value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:22px; font-weight:600;
+    margin-bottom:6px;
+  }
+  .kpi-card .delta{
+    font-size:12px; font-weight:600;
+    display:inline-flex; align-items:center; gap:4px;
+  }
+  .delta.up{color:var(--teal);}
+  .delta.down{color:var(--coral);}
+  .delta.neutral{color:var(--muted);}
+  .kpi-card .glow{
+    position:absolute; width:80px; height:80px; border-radius:50%;
+    filter:blur(30px); opacity:.35; top:-30px; right:-20px;
+  }
+
+  /* ===== Signature: Pipeline River ===== */
+  .section-title{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .section-title h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:16px; font-weight:600;
+  }
+  .section-title .hint{font-size:12px; color:var(--muted);}
+
+  .river-wrap{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 20px 8px;
+    margin-bottom:26px;
+  }
+  .river{
+    display:flex;
+    align-items:stretch;
+    gap:3px;
+    height:172px;
+    position:relative;
+  }
+  .stage{
+    position:relative;
+    border-radius:16px;
+    padding:12px 12px 0;
+    display:flex;
+    flex-direction:column;
+    overflow:visible;
+    background-size:220% 220%;
+    animation:flow 9s ease-in-out infinite;
+  }
+  @keyframes flow{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  .stage.s1{flex:0.9; background-image:linear-gradient(120deg,#1c2431,#212b3a,#1c2431);}
+  .stage.s2{flex:1.4; background-image:linear-gradient(120deg,#16323a,#1a3d44,#16323a);}
+  .stage.s3{flex:1.9; background-image:linear-gradient(120deg,#153536,#1a4144,#153536);}
+  .stage.s4{flex:1.6; background-image:linear-gradient(120deg,#2a2a1c,#38371f,#2a2a1c);}
+  .stage.s5{flex:0.9; background-image:linear-gradient(120deg,#152a24,#173d31,#152a24); border:1px solid rgba(45,212,191,.35);}
+
+  .stage-label{
+    font-size:11px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.04em;
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:2px;
+  }
+  .stage-label .val{font-family:'IBM Plex Mono',monospace; color:var(--text); font-size:12px;}
+  .stage-count{font-size:10.5px; color:var(--muted); margin-bottom:8px;}
+
+  .drop-row{
+    position:relative;
+    flex:1;
+    display:flex;
+    align-items:flex-end;
+    gap:6px;
+    flex-wrap:wrap;
+    padding-bottom:10px;
+  }
+  .droplet{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(2px);
+    border-radius:10px;
+    padding:6px 8px;
+    font-size:10.5px;
+    min-width:74px;
+    animation:bob 4.5s ease-in-out infinite;
+    cursor:default;
+    transition:background .15s ease;
+  }
+  .droplet:hover{background:rgba(255,255,255,0.13);}
+  .droplet:nth-child(2n){animation-delay:.8s;}
+  .droplet:nth-child(3n){animation-delay:1.6s;}
+  @keyframes bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-4px);}
+  }
+  .droplet .co{font-weight:600; margin-bottom:2px; color:var(--text);}
+  .droplet .amt{font-family:'IBM Plex Mono',monospace; color:var(--teal);}
+  .ai-score{
+    display:inline-block; margin-top:3px;
+    font-size:9px; font-weight:700; color:#0E1116;
+    background:var(--violet); padding:1px 5px; border-radius:20px;
+  }
+
+  .river-legend{
+    display:flex; justify-content:flex-end; gap:16px;
+    padding:10px 4px 4px; font-size:11px; color:var(--muted);
+  }
+
+  /* ===== Lower grid ===== */
+  .lower-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:18px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+  }
+  .card h3{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14.5px; font-weight:600; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .timeline-item{
+    display:flex; gap:12px;
+    padding:11px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .timeline-item:last-child{border-bottom:none; padding-bottom:0;}
+  .t-icon{
+    width:32px; height:32px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .t-icon svg{width:15px; height:15px;}
+  .t-icon.call{background:var(--teal-dim); color:var(--teal);}
+  .t-icon.mail{background:var(--amber-dim); color:var(--amber);}
+  .t-icon.wa{background:rgba(139,124,246,0.14); color:var(--violet);}
+  .t-icon.note{background:var(--panel-2); color:var(--muted);}
+  .t-body{flex:1;}
+  .t-top{display:flex; justify-content:space-between; gap:8px;}
+  .t-title{font-size:13px; font-weight:500;}
+  .t-time{font-size:11px; color:var(--muted); white-space:nowrap;}
+  .t-desc{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .t-ai-tag{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:10.5px; color:var(--teal);
+    margin-top:6px; font-weight:600;
+  }
+  .t-ai-tag svg{width:11px; height:11px;}
+
+  .stat-mini-row{display:flex; gap:10px; margin-top:2px;}
+  .stat-mini{
+    flex:1; background:var(--panel-2); border-radius:10px; padding:10px 12px;
+  }
+  .stat-mini .n{font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600;}
+  .stat-mini .l{font-size:10.5px; color:var(--muted); margin-top:2px;}
+
+  /* ===== Integrations footer ===== */
+  .integrations{
+    margin-top:22px;
+    display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+  }
+  .integrations .lbl{font-size:11.5px; color:var(--muted); margin-right:6px;}
+  .chip{
+    font-size:11px; color:var(--muted);
+    border:1px solid var(--line);
+    padding:4px 10px; border-radius:20px;
+    display:flex; align-items:center; gap:5px;
+  }
+  .chip .pip{width:6px; height:6px; border-radius:50%; background:var(--teal);}
+
+  /* ===== Copilot panel ===== */
+  .copilot{
+    grid-area:copilot;
+    background:var(--panel);
+    border-left:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  .copilot-head{
+    padding:18px 18px 14px;
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:10px;
+  }
+  .copilot-head .glyph{
+    width:32px; height:32px; border-radius:9px;
+    background:linear-gradient(135deg,var(--teal),var(--violet));
+    display:flex; align-items:center; justify-content:center;
+  }
+  .copilot-head .glyph svg{width:16px; height:16px; color:#0E1116;}
+  .copilot-head h3{font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600;}
+  .live-pill{
+    display:flex; align-items:center; gap:5px;
+    font-size:10.5px; color:var(--teal); font-weight:600;
+    margin-top:2px;
+  }
+  .live-pill .p{width:6px; height:6px; border-radius:50%; background:var(--teal); animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+
+  .copilot-body{padding:16px 16px 8px; flex:1;}
+  .cop-section-lbl{font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin:12px 0 8px;}
+  .cop-card{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:12px 13px;
+    margin-bottom:10px;
+  }
+  .cop-card .cc-top{display:flex; justify-content:space-between; gap:8px; margin-bottom:4px;}
+  .cop-card .cc-title{font-size:12.5px; font-weight:600;}
+  .cop-card .cc-desc{font-size:11.5px; color:var(--muted); line-height:1.45;}
+  .cop-actions{display:flex; gap:8px; margin-top:10px;}
+  .mini-btn{
+    font-size:11px; font-weight:600; padding:6px 10px; border-radius:7px;
+    cursor:pointer;
+  }
+  .mini-btn.solid{background:var(--teal); color:#08211d;}
+  .mini-btn.ghost{background:transparent; border:1px solid var(--line); color:var(--muted);}
+  .urgent-flag{color:var(--coral);}
+
+  .chat-bubble{
+    background:var(--panel-2);
+    border-radius:11px 11px 11px 3px;
+    padding:10px 12px;
+    font-size:12px;
+    margin-bottom:10px;
+    max-width:92%;
+    line-height:1.5;
+  }
+  .chat-bubble strong{color:var(--teal);}
+  .typing{
+    display:flex; gap:3px; padding:10px 12px;
+  }
+  .typing span{width:5px; height:5px; border-radius:50%; background:var(--muted); animation:tb 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;}
+  .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes tb{0%,60%,100%{opacity:.3;} 30%{opacity:1;}}
+
+  .copilot-input{
+    padding:14px 16px 16px;
+    border-top:1px solid var(--line);
+  }
+  .copilot-input .box{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 11px;
+  }
+  .copilot-input input{
+    flex:1; background:none; border:none; outline:none; color:var(--text); font-size:12.5px;
+  }
+  .copilot-input svg{width:15px; height:15px; color:var(--teal); flex-shrink:0; cursor:pointer;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px;}
+
+  @media (prefers-reduced-motion: reduce){
+    .stage, .droplet, .live-pill .p, .typing span{animation:none !important;}
+  }
+
+  @media (max-width: 1200px){
+    .kpi-row{grid-template-columns:repeat(3,1fr);}
+    .shell{grid-template-columns:64px 1fr;}
+    .copilot{display:none;}
+  }
+  @media (max-width: 760px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .lower-grid{grid-template-columns:1fr;}
+    .search-bar{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ICON RAIL -->
+  <nav class="rail">
+    <div class="rail-logo">C</div>
+    <div class="rail-item active" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+    </div>
+    <div class="rail-item" title="Leads &amp; Pipeline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+    </div>
+    <div class="rail-item" title="Contacts &amp; Companies">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6M17 8.2a3 3 0 1 1 0 6M21.5 20c0-2.8-2-5-4.7-5.7"/></svg>
+    </div>
+    <div class="rail-item" title="Tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2.5"/></svg>
+    </div>
+    <div class="rail-item" title="Messages &amp; Calls">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4A8.5 8.5 0 0 1 4 15.7L2.5 21l5.5-1.4a8.4 8.4 0 0 0 4 1.1 8.4 8.4 0 0 0 9-8.5Z"/></svg>
+    </div>
+    <div class="rail-item" title="Calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    </div>
+    <div class="rail-item" title="Documents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 21V4.5A1.5 1.5 0 0 1 6 3Z"/></svg>
+    </div>
+    <div class="rail-item" title="Automation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+    </div>
+    <div class="rail-item" title="Payments &amp; Billing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19"/></svg>
+    </div>
+    <div class="rail-spacer"></div>
+    <div class="rail-item" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-2.6-1.5L14 2h-4l-.4 2.5a7.7 7.7 0 0 0-2.6 1.5l-2.4-1-2 3.4 2 1.6a7.7 7.7 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 2.6 1.5L10 22h4l.4-2.5a7.7 7.7 0 0 0 2.6-1.5l2.4 1 2-3.4Z"/></svg>
+    </div>
+    <div class="rail-avatar">SR</div>
+  </nav>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">CURRENT <span class="tag">AI CRM</span></div>
+    <div class="workspace-switch">
+      Tech Company Labs
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4-4"/></svg>
+      <input type="text" placeholder="Search leads, deals, contacts, or ask a question…">
+      <span class="kbd">⌘K</span>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="icon-btn" title="Notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+      <span class="dot-badge"></span>
+    </div>
+    <div class="icon-btn" title="Help">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.5"/><path d="M12 17.2v.1"/></svg>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="page-head">
+      <div>
+        <h1>Good afternoon, Sohel</h1>
+        <p>Saturday, 11 July — Q3 pipeline is 18% ahead of target</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New task</button>
+        <button class="btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New lead</button>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="glow" style="background:var(--teal);"></div>
+        <div class="label">Open pipeline value</div>
+        <div class="value">$625,400</div>
+        <div class="delta up">↑ 12% vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="glow" style="background:var(--amber);"></div>
+        <div class="label">Won this month</div>
+        <div class="value">$92,300</div>
+        <div class="delta up">↑ 14 deals closed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="glow" style="background:var(--violet);"></div>
+        <div class="label">Avg. deal cycle</div>
+        <div class="value">18 days</div>
+        <div class="delta up">↓ 3 days faster</div>
+      </div>
+      <div class="kpi-card">
+        <div class="glow" style="background:var(--teal);"></div>
+        <div class="label">AI-qualified leads</div>
+        <div class="value">47</div>
+        <div class="delta neutral">this week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="glow" style="background:var(--coral);"></div>
+        <div class="label">AI call minutes handled</div>
+        <div class="value">6h 42m</div>
+        <div class="delta up">≈ 9h rep time saved</div>
+      </div>
+    </div>
+
+    <!-- PIPELINE RIVER -->
+    <div class="section-title">
+      <h2>Pipeline flow</h2>
+      <span class="hint">Segment width = stage value · droplets = active deals</span>
+    </div>
+    <div class="river-wrap">
+      <div class="river">
+        <div class="stage s1">
+          <div class="stage-label">New <span class="val">$84K</span></div>
+          <div class="stage-count">12 leads</div>
+          <div class="drop-row">
+            <div class="droplet"><div class="co">Orion Retail</div><div class="amt">$9.2K</div><span class="ai-score">AI 82</span></div>
+            <div class="droplet"><div class="co">Halcyon Labs</div><div class="amt">$6.5K</div></div>
+          </div>
+        </div>
+        <div class="stage s2">
+          <div class="stage-label">Qualified <span class="val">$156K</span></div>
+          <div class="stage-count">9 leads</div>
+          <div class="drop-row">
+            <div class="droplet"><div class="co">Meridian Foods</div><div class="amt">$21K</div><span class="ai-score">AI 91</span></div>
+            <div class="droplet"><div class="co">Vantage Group</div><div class="amt">$14K</div></div>
+            <div class="droplet"><div class="co">Kepler Health</div><div class="amt">$18K</div></div>
+          </div>
+        </div>
+        <div class="stage s3">
+          <div class="stage-label">Proposal sent <span class="val">$210K</span></div>
+          <div class="stage-count">6 leads</div>
+          <div class="drop-row">
+            <div class="droplet"><div class="co">Northbridge Co.</div><div class="amt">$48K</div><span class="ai-score">AI 88</span></div>
+            <div class="droplet"><div class="co">Delta Freight</div><div class="amt">$32K</div></div>
+            <div class="droplet"><div class="co">Solace Media</div><div class="amt">$29K</div></div>
+          </div>
+        </div>
+        <div class="stage s4">
+          <div class="stage-label">Negotiation <span class="val">$175K</span></div>
+          <div class="stage-count">4 leads</div>
+          <div class="drop-row">
+            <div class="droplet"><div class="co">Atlas Wear</div><div class="amt">$61K</div><span class="ai-score">AI 95</span></div>
+            <div class="droplet"><div class="co">Ferro Build</div><div class="amt">$44K</div></div>
+          </div>
+        </div>
+        <div class="stage s5">
+          <div class="stage-label">Won <span class="val">$92K</span></div>
+          <div class="stage-count">14 this mo.</div>
+          <div class="drop-row">
+            <div class="droplet"><div class="co">Cinder Corp</div><div class="amt">$18K</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="river-legend">
+        <span><span class="ai-score" style="position:relative; top:-1px;">AI</span> AI-generated lead score</span>
+      </div>
+    </div>
+
+    <!-- LOWER GRID -->
+    <div class="lower-grid">
+      <div class="card">
+        <h3>Recent activity <span class="hint" style="font-size:11px; color:var(--muted); font-weight:400;">Live across all channels</span></h3>
+
+        <div class="timeline-item">
+          <div class="t-icon call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16.9v2.6a2 2 0 0 1-2.2 2 18.6 18.6 0 0 1-8.1-2.9 18.3 18.3 0 0 1-5.6-5.6 18.6 18.6 0 0 1-2.9-8.2A2 2 0 0 1 4.3 3h2.6a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 10.6a14.6 14.6 0 0 0 5.5 5.5l1.1-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z"/></svg>
+          </div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">AI voice agent — Meridian Foods</span><span class="t-time">12 min ago</span></div>
+            <div class="t-desc">Outbound qualification call, 4m 12s, positive sentiment</div>
+            <div class="t-ai-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>Summary ready — budget confirmed, next call Thursday</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="t-icon wa">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4A8.5 8.5 0 0 1 4 15.7L2.5 21l5.5-1.4a8.4 8.4 0 0 0 4 1.1 8.4 8.4 0 0 0 9-8.5Z"/></svg>
+          </div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">WhatsApp — Northbridge Co.</span><span class="t-time">40 min ago</span></div>
+            <div class="t-desc">"Can you resend the proposal PDF with updated pricing?"</div>
+            <div class="t-ai-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>Draft reply generated — awaiting your approval</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="t-icon mail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18v12H3Z"/><path d="m3 7 9 6 9-6"/></svg>
+          </div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">Email — Atlas Wear</span><span class="t-time">1h ago</span></div>
+            <div class="t-desc">Contract redline received from legal team</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="t-icon note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5"/><path d="M6 3h8l5 5v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 21V4.5A1.5 1.5 0 0 1 6 3Z"/></svg>
+          </div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">Document processed — Kepler Health</span><span class="t-time">2h ago</span></div>
+            <div class="t-desc">OCR extracted 14 fields from signed W-9 · stored &amp; version-tagged</div>
+          </div>
+        </div>
+
+        <div class="stat-mini-row">
+          <div class="stat-mini"><div class="n">312</div><div class="l">Messages today</div></div>
+          <div class="stat-mini"><div class="n">28</div><div class="l">Calls handled</div></div>
+          <div class="stat-mini"><div class="n">96%</div><div class="l">AI triage accuracy</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Team &amp; roles</h3>
+        <div class="timeline-item" style="border-bottom:1px solid var(--line);">
+          <div class="t-icon note" style="background:var(--teal-dim); color:var(--teal);">SR</div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">Sohel Rana</span><span class="t-time mono" style="color:var(--muted);">Admin</span></div>
+            <div class="t-desc">Full access · 42 open deals owned</div>
+          </div>
+        </div>
+        <div class="timeline-item" style="border-bottom:1px solid var(--line);">
+          <div class="t-icon note">RA</div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">Rima Akter</span><span class="t-time mono" style="color:var(--muted);">Sales rep</span></div>
+            <div class="t-desc">Pipeline + contacts only · custom field set</div>
+          </div>
+        </div>
+        <div class="timeline-item" style="border-bottom:none;">
+          <div class="t-icon note">TL</div>
+          <div class="t-body">
+            <div class="t-top"><span class="t-title">Tariq Islam</span><span class="t-time mono" style="color:var(--muted);">Support</span></div>
+            <div class="t-desc">Messaging + tickets · no billing access</div>
+          </div>
+        </div>
+
+        <div class="integrations" style="margin-top:16px;">
+          <span class="lbl">Connected</span>
+          <span class="chip"><span class="pip"></span>Stripe</span>
+          <span class="chip"><span class="pip"></span>PayPal</span>
+          <span class="chip"><span class="pip"></span>Twilio</span>
+          <span class="chip"><span class="pip"></span>Google Workspace</span>
+          <span class="chip"><span class="pip"></span>Google Doc AI</span>
+          <span class="chip"><span class="pip"></span>OpenAI</span>
+          <span class="chip"><span class="pip"></span>Claude</span>
+          <span class="chip"><span class="pip"></span>ElevenLabs</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- AI COPILOT PANEL -->
+  <aside class="copilot">
+    <div class="copilot-head">
+      <div class="glyph">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5Z"/></svg>
+      </div>
+      <div>
+        <h3>AI Copilot</h3>
+        <div class="live-pill"><span class="p"></span>Live · watching 4 channels</div>
+      </div>
+    </div>
+
+    <div class="copilot-body">
+      <div class="chat-bubble">Good afternoon. <strong>3 deals</strong> have been idle for over 7 days and <strong>2 invoices</strong> are overdue. Want me to draft follow-ups for both?</div>
+
+      <div class="cop-section-lbl">Suggested actions</div>
+
+      <div class="cop-card">
+        <div class="cc-top"><span class="cc-title">Stalled deal follow-up</span></div>
+        <div class="cc-desc">Delta Freight ($32K) — no activity in 9 days. Draft a check-in email?</div>
+        <div class="cop-actions">
+          <div class="mini-btn solid">Draft email</div>
+          <div class="mini-btn ghost">Snooze</div>
+        </div>
+      </div>
+
+      <div class="cop-card">
+        <div class="cc-top"><span class="cc-title">Call summary ready</span></div>
+        <div class="cc-desc">Meridian Foods, 4m 12s — budget confirmed, timeline is Q3. Log to CRM?</div>
+        <div class="cop-actions">
+          <div class="mini-btn solid">Log to deal</div>
+          <div class="mini-btn ghost">Play back</div>
+        </div>
+      </div>
+
+      <div class="cop-card">
+        <div class="cc-top"><span class="cc-title"><span class="urgent-flag">●</span> Overdue invoice</span></div>
+        <div class="cc-desc">Invoice #1042 — Cinder Corp, 6 days overdue. Send WhatsApp reminder?</div>
+        <div class="cop-actions">
+          <div class="mini-btn solid">Send reminder</div>
+          <div class="mini-btn ghost">Dismiss</div>
+        </div>
+      </div>
+
+      <div class="cop-section-lbl">Copilot is thinking</div>
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="copilot-input">
+      <div class="box">
+        <input type="text" placeholder="Ask about your pipeline, a deal, or a contact…">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 20 18-8L3 4v6l12 2-12 2Z"/></svg>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+</body>
+</html>
