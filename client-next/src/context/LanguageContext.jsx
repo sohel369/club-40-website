@@ -5,10 +5,12 @@ import { DICTIONARY } from '../translations/dictionary.js';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  // Try to load language preference from localStorage, default is 'bn'
   const [language, setLanguageState] = useState(() => {
-    const savedLang = localStorage.getItem('language');
-    return savedLang === 'en' || savedLang === 'bn' ? savedLang : 'bn';
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('language');
+      return savedLang === 'en' || savedLang === 'bn' ? savedLang : 'bn';
+    }
+    return 'bn';
   });
 
   const setLanguage = (lang) => {
