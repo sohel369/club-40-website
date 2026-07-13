@@ -1,11 +1,13 @@
+"use client";
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '../context/LanguageContext';
 
 const Footer = ({ onCategorySelect }) => {
   const { t } = useLanguage();
-  const location = useLocation();
-  const isProfilePage = location.pathname === '/profile';
+  const pathname = usePathname();
+  const isProfilePage = pathname === '/profile';
 
   const handleCategoryClick = (category) => {
     if (onCategorySelect) {
@@ -36,11 +38,11 @@ const Footer = ({ onCategorySelect }) => {
             <ul className="footer-links">
               {isProfilePage ? (
                 <>
-                  <li><Link to="/#home">{t('navHome')}</Link></li>
-                  <li><Link to="/#clubs">{t('navClubs')}</Link></li>
-                  <li><Link to="/#testimonials">{t('navStories')}</Link></li>
-                  <li><Link to="/#faqs">{t('navFaqs')}</Link></li>
-                  <li><Link to="/#join">{t('navJoin')}</Link></li>
+                  <li><Link href="/#home">{t('navHome')}</Link></li>
+                  <li><Link href="/#clubs">{t('navClubs')}</Link></li>
+                  <li><Link href="/#testimonials">{t('navStories')}</Link></li>
+                  <li><Link href="/#faqs">{t('navFaqs')}</Link></li>
+                  <li><Link href="/#join">{t('navJoin')}</Link></li>
                 </>
               ) : (
                 <>

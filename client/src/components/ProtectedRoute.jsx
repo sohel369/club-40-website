@@ -1,9 +1,17 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+"use client";
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -17,7 +25,7 @@ const ProtectedRoute = ({ children }) => {
         fontFamily: 'var(--font-bengali)'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <i class="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', marginBottom: '16px' }}></i>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', marginBottom: '16px' }}></i>
           <h2>অপেক্ষা করুন / Please wait...</h2>
         </div>
       </div>
@@ -25,7 +33,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return null;
   }
 
   return children;

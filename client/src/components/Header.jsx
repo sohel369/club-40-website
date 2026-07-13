@@ -1,5 +1,7 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -11,8 +13,8 @@ const Header = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const { user, logout, updateProfile, API_URL } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useRouter();
+  const pathname = usePathname();
   const pollRef = useRef(null);
 
   useEffect(() => {
@@ -76,12 +78,12 @@ const Header = () => {
     navigate('/login');
   };
 
-  const isProfilePage = location.pathname === '/profile';
+  const isProfilePage = pathname === '/profile';
 
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'between', height: '80px' }}>
-        <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
+        <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
           <i className="fa-solid fa-hand-holding-heart"></i>
           <span>{t('logoText')}</span>
           <span className="logo-dot"></span>
@@ -92,7 +94,7 @@ const Header = () => {
         }}>
           {isProfilePage ? (
             <>
-              <Link to="/#home" className="nav-link" onClick={() => setMobileMenuOpen(false)}>{t('navHome')}</Link>
+              <Link href="/#home" className="nav-link" onClick={() => setMobileMenuOpen(false)}>{t('navHome')}</Link>
             </>
           ) : (
             <>
@@ -101,7 +103,7 @@ const Header = () => {
           )}
           {user && (
             <Link 
-              to="/profile" 
+              href="/profile" 
               className={`nav-link ${isProfilePage ? 'active' : ''}`} 
               onClick={() => setMobileMenuOpen(false)}
               style={{
@@ -117,8 +119,8 @@ const Header = () => {
           )}
           {user && user.role === 'super_admin' && (
             <Link 
-              to="/admin" 
-              className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`} 
+              href="/admin" 
+              className={`nav-link ${pathname === '/admin' ? 'active' : ''}`} 
               onClick={() => setMobileMenuOpen(false)}
               style={{
                 color: 'var(--primary-color)',
@@ -158,7 +160,7 @@ const Header = () => {
           {/* Message Bell */}
           {user && (
             <Link
-              to="/messages"
+              href="/messages"
               className="theme-toggle"
               style={{ position: 'relative', color: unreadCount > 0 ? 'var(--primary-color)' : undefined, textDecoration: 'none' }}
               title={language === 'bn' ? 'বার্তা' : 'Messages'}
