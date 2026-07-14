@@ -36,23 +36,11 @@ const Footer = ({ onCategorySelect }) => {
           <div className="footer-col">
             <h4>{t('footerColQuickLinks')}</h4>
             <ul className="footer-links">
-              {isProfilePage ? (
-                <>
-                  <li><Link href="/#home">{t('navHome')}</Link></li>
-                  <li><Link href="/#clubs">{t('navClubs')}</Link></li>
-                  <li><Link href="/#testimonials">{t('navStories')}</Link></li>
-                  <li><Link href="/#faqs">{t('navFaqs')}</Link></li>
-                  <li><Link href="/#join">{t('navJoin')}</Link></li>
-                </>
-              ) : (
-                <>
-                  <li><a href="#home">{t('navHome')}</a></li>
-                  <li><a href="#clubs">{t('navClubs')}</a></li>
-                  <li><a href="#testimonials">{t('navStories')}</a></li>
-                  <li><a href="#faqs">{t('navFaqs')}</a></li>
-                  <li><a href="#join">{t('navJoin')}</a></li>
-                </>
-              )}
+              <li><Link href="/#home">{t('navHome')}</Link></li>
+              <li><Link href="/#clubs">{t('navClubs')}</Link></li>
+              <li><Link href="/#testimonials">{t('navStories')}</Link></li>
+              <li><Link href="/#faqs">{t('navFaqs')}</Link></li>
+              <li><Link href="/#join">{t('navJoin')}</Link></li>
             </ul>
           </div>
 
@@ -60,29 +48,29 @@ const Footer = ({ onCategorySelect }) => {
             <h4>{t('footerColCategories')}</h4>
             <ul className="footer-links">
               <li>
-                <a href="#clubs" onClick={() => handleCategoryClick('education')}>
+                <Link href="/#clubs" onClick={() => handleCategoryClick('education')}>
                   {t('filterEducation')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#clubs" onClick={() => handleCategoryClick('welfare')}>
+                <Link href="/#clubs" onClick={() => handleCategoryClick('welfare')}>
                   {t('filterWelfare')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#clubs" onClick={() => handleCategoryClick('environment')}>
+                <Link href="/#clubs" onClick={() => handleCategoryClick('environment')}>
                   {t('filterEnvironment')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#clubs" onClick={() => handleCategoryClick('health')}>
+                <Link href="/#clubs" onClick={() => handleCategoryClick('health')}>
                   {t('filterHealth')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#clubs" onClick={() => handleCategoryClick('skills')}>
+                <Link href="/#clubs" onClick={() => handleCategoryClick('skills')}>
                   {t('filterSkills')}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

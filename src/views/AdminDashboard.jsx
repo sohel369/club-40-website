@@ -59,7 +59,7 @@ const AdminDashboard = () => {
   // Access check on mount
   useEffect(() => {
     if (!user || user.role !== 'super_admin') {
-      navigate('/');
+      navigate.push('/');
     }
   }, [user, navigate]);
 
@@ -101,14 +101,6 @@ const AdminDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    if (user && user.role === 'super_admin') {
-      if (activeTab === 'users') fetchUsers();
-      if (activeTab === 'clubs') fetchClubs();
-      if (activeTab === 'applications') fetchApplications();
-    }
-  }, [activeTab, user, API_URL]);
-
   // Fetch Applications
   const fetchApplications = async () => {
     setLoadingApps(true);
@@ -127,6 +119,16 @@ const AdminDashboard = () => {
       setLoadingApps(false);
     }
   };
+
+  useEffect(() => {
+    if (user && user.role === 'super_admin') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (activeTab === 'users') fetchUsers();
+      if (activeTab === 'clubs') fetchClubs();
+      if (activeTab === 'applications') fetchApplications();
+    }
+  }, [activeTab, user, API_URL]);
+
 
   const handleAppStatusChange = async (id, status) => {
     const token = localStorage.getItem('token');

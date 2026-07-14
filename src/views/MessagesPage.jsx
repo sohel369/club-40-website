@@ -40,7 +40,7 @@ const formatTime = (dateStr) => {
 
 // ────────────────────────────────────────────────────────
 const MessagesPage = () => {
-  const { API_URL, user } = useAuth();
+  const { API_URL, user, loading } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -69,8 +69,10 @@ const MessagesPage = () => {
 
   // ── Redirect if not logged in ──
   useEffect(() => {
-    if (!user) navigate('/login');
-  }, [user, navigate]);
+    if (!loading && !user) {
+      navigate.push('/login');
+    }
+  }, [user, loading, navigate]);
 
   // ── Fetch admin ID ──
   useEffect(() => {
@@ -94,38 +96,6 @@ const MessagesPage = () => {
       .then(data => setAllUsers(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [API_URL, isAdmin]);
-
-  // ── Load conversations / inbox ──
-  const loadConversations = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (isAdmin) {
-      setLoadingConvs(true);
-      try {
-        const r = await fetch(`${API_URL}/messages/conversations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (r.ok) setConversations(await r.json());
-      } catch (_) {}
-      setLoadingConvs(false);
-    } else {
-      setLoadingConvs(false);
-      // Non-admin: auto-open admin thread
-      if (adminId) openThread(adminId, t('অ্যাডমিন', 'Admin'));
-    }
-  }, [API_URL, isAdmin, adminId]);
-
-  useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
-
-  // ── Handle ?user= query param (from admin dashboard) ──
-  useEffect(() => {
-    const uid = searchParams.get('user');
-    if (uid && isAdmin && allUsers.length > 0) {
-      const u = allUsers.find(x => (x.id || x._id) === uid);
-      if (u) openThread(uid, u.name);
-    }
-  }, [searchParams, isAdmin, allUsers]);
 
   // ── Open a thread ──
   const openThread = useCallback(async (userId, userName) => {
@@ -156,6 +126,43 @@ const MessagesPage = () => {
 
     inputRef.current?.focus();
   }, [API_URL]);
+
+  // ── Load conversations / inbox ──
+  const loadConversations = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (isAdmin) {
+      setLoadingConvs(true);
+      try {
+        const r = await fetch(`${API_URL}/messages/conversations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok) setConversations(await r.json());
+      } catch (_) {}
+      setLoadingConvs(false);
+    } else {
+      setLoadingConvs(false);
+      // Non-admin: auto-open admin thread
+      if (adminId) openThread(adminId, t('অ্যাডমিন', 'Admin'));
+    }
+  }, [API_URL, isAdmin, adminId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadConversations();
+  }, [loadConversations]);
+
+  // ── Handle ?user= query param (from admin dashboard) ──
+  useEffect(() => {
+    const uid = searchParams.get('user');
+    if (uid && isAdmin && allUsers.length > 0) {
+      const u = allUsers.find(x => (x.id || x._id) === uid);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (u) openThread(uid, u.name);
+    }
+  }, [searchParams, isAdmin, allUsers]);
+
+
+
 
   // ── Polling for new messages (every 8s) ──
   useEffect(() => {
@@ -259,6 +266,7 @@ const MessagesPage = () => {
   // ── Non-admin: auto-open admin thread when adminId is known ──
   useEffect(() => {
     if (!isAdmin && adminId && !activeUserId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       openThread(adminId, t('অ্যাডমিন (Sohel)', 'Admin (Sohel)'));
     }
   }, [isAdmin, adminId, activeUserId, openThread]);

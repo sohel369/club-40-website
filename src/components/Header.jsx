@@ -75,7 +75,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate.push('/login');
   };
 
   const isProfilePage = pathname === '/profile';
@@ -92,15 +92,9 @@ const Header = () => {
         <nav className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`} style={{
           left: mobileMenuOpen ? '0' : '-100%'
         }}>
-          {isProfilePage ? (
-            <>
-              <Link href="/#home" className="nav-link" onClick={() => setMobileMenuOpen(false)}>{t('navHome')}</Link>
-            </>
-          ) : (
-            <>
-              <a href="#home" className="nav-link active" onClick={() => setMobileMenuOpen(false)}>{t('navHome')}</a>
-            </>
-          )}
+          <Link href="/#home" className={`nav-link ${pathname === '/' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+            {t('navHome')}
+          </Link>
           {user && (
             <Link 
               href="/profile" 

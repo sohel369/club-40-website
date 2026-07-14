@@ -26,7 +26,7 @@ const ProfilePage = () => {
     const club = STATIC_CLUBS_LIST.find(c => c.id === user.clubId);
     if (!club) return null;
     const isEducation = club.id <= 15 || (club.id >= 36 && club.id <= 40);
-    return isEducation ? '/assets/education_cat.png' : '/assets/welfare_cat.png';
+    return isEducation ? '/hero.png' : '/hero.png';
   };
 
   const handleSave = async (e) => {

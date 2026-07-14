@@ -72,6 +72,7 @@ const Dashboard = () => {
   // Fetch posts for the selected club
   useEffect(() => {
     if (!selectedClub) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosts([]);
       return;
     }
@@ -305,7 +306,7 @@ const Dashboard = () => {
           
           <div className="hero-image-wrapper">
             <div className="hero-image-card">
-              <img src="/assets/hero_bg.png" alt="Community Social Service and Education" />
+              <img src="/hero.png" alt="Community Social Service and Education" />
             </div>
             <div className="hero-badge-float">
               <div className="hero-badge-icon">
@@ -630,7 +631,7 @@ const Dashboard = () => {
                 {TESTIMONIALS_TRANSLATIONS[language].map(testimonial => (
                   <div key={testimonial.id} className="carousel-slide">
                     <div className="testimonial-card">
-                      <p className="testimonial-quote">"{testimonial.quote}"</p>
+                      <p className="testimonial-quote">&quot;{testimonial.quote}&quot;</p>
                       <div className="testimonial-author">
                         <div className="testimonial-avatar">
                           <img 

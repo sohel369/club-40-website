@@ -57,6 +57,7 @@ const AuthPage = () => {
   // Fetch posts for selected club (public)
   useEffect(() => {
     if (!selectedClub) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosts([]);
       return;
     }
@@ -81,7 +82,7 @@ const AuthPage = () => {
   useEffect(() => {
     if (user) {
       const from = location.state?.from?.pathname || "/";
-      navigate(from, { replace: true });
+      navigate.replace(from);
     }
   }, [user, navigate, location]);
 

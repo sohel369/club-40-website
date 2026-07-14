@@ -113,6 +113,13 @@ const ClubDetailsPage = () => {
     if (club) fetchPosts();
   }, [clubId, club, API_URL]);
 
+  // Scroll Chat to bottom
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   // Fetch Chat messages
   useEffect(() => {
     const fetchMessages = async () => {
@@ -139,12 +146,7 @@ const ClubDetailsPage = () => {
     if (club) fetchMessages();
   }, [clubId, club, isUserMember, API_URL]);
 
-  // Scroll Chat to bottom
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
+
 
   // Submit Post handler
   const handlePostSubmit = async (e) => {
@@ -920,7 +922,7 @@ const ClubDetailsPage = () => {
             </div>
             <h3 style={{ fontSize: '1.2rem', marginBottom: '12px' }}>{language === 'bn' ? 'পোস্ট মুছবেন?' : 'Delete Post?'}</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}>
-              <strong style={{ color: 'var(--text-primary)' }}>"{deleteConfirmPost.title}"</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>&quot;{deleteConfirmPost.title}&quot;</strong>
             </p>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '28px' }}>
               {language === 'bn' ? 'এই পোস্টটি স্থায়ীভাবে মুছে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।' : 'This post will be permanently deleted. This action cannot be undone.'}
