@@ -153,7 +153,7 @@ const MessagesPage = () => {
 
   // ── Handle ?user= query param (from admin dashboard) ──
   useEffect(() => {
-    const uid = searchParams.get('user');
+    const uid = searchParams?.get('user');
     if (uid && isAdmin && allUsers.length > 0) {
       const u = allUsers.find(x => (x.id || x._id) === uid);
       // eslint-disable-next-line react-hooks/set-state-in-effect
