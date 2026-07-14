@@ -43,7 +43,7 @@ const MessagesPage = () => {
   const { API_URL, user, loading } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
 
   const isAdmin = user?.role === 'super_admin' && user?.email === ADMIN_EMAIL;
 
