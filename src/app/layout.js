@@ -28,6 +28,8 @@ export default function RootLayout({ children }) {
     >
       <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      </head>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -40,8 +42,6 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
-      </head>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <LanguageProvider>
           <AuthProvider>
             <div id="root">
